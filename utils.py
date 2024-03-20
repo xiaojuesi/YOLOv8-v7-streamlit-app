@@ -184,14 +184,21 @@ def load_pic(pic_path):
     return frame_original
 
 
-def test_door(image_name,frame_original):
-
+def test_door(frame,frame_original):
+    # image_name = None
     timelimit = 10
     ifopen = False
-    frame = cv2.imread(image_name)
 
+
+    # frame = cv2.imread(image_name)
     # frame = cv2.imread(os.path.join('test', image_name))
-    fgmask = cv2.absdiff(frame_original, frame)
+
+    # 修改两张图片的通道数量，保证
+    frame_resized = cv2.resize(frame, (frame_original.shape[1], frame_original.shape[0]))
+    fgmask = cv2.absdiff(frame_original, frame_resized)
+
+
+    # fgmask = cv2.absdiff(frame_original, frame)
     thresh = cv2.threshold(fgmask, 25, 255, cv2.THRESH_BINARY)[1]
 
 
@@ -201,25 +208,110 @@ def test_door(image_name,frame_original):
         lower_half = thresh[height//2:, :]
 
         if np.sum(upper_half) > np.sum(lower_half):
-            print('上面的修改：',np.sum(upper_half))
-            print('下面的修改：',np.sum(lower_half))
+            # print('上面的修改：',np.sum(upper_half))
+            # print('下面的修改：',np.sum(lower_half))
 
-            print("外侵入开门")
+            # print("外侵入开门")
+            return "外侵入开门"
             ifopen = True
             timelimit = 10
         else:
-            print("内侵入开门")
+            return "内侵入开门"
+            # print("内侵入开门")
             ifopen = True
             timelimit = 10
+
     else:
         if timelimit > 0 and ifopen == True:
             timelimit -= 1
-            print(f"关门倒计时{timelimit}")
+            # print(f"关门倒计时{timelimit}")
+            return f"关门倒计时{timelimit}"
             time.sleep(1)
         elif timelimit == 0:
             ifopen == False
-            print("超时关门")
-
-
+            # print("超时关门")
+            return "超时关门"
 # test_door("test_pic/test_image_in.jpg",load_pic('weights/opencv_door/standard.jpg'))
 
+def save_uploaded_file(uploaded_file):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=uploaded_file.name) as tmp_file:
+            tmp_file.write(uploaded_file.getvalue())
+            return tmp_file.name
+    except Exception as e:
+        print(e)
+        return None
+
+
+def adjust_uploaded_image_door(pic):
+    """
+    为上传的图像执行推断
+    :param pic: 初始图片设置
+    :return: None
+    """
+
+
+    source_img = st.sidebar.file_uploader(
+        label="选择一张图像...",
+        type=("jpg", "jpeg", "png", 'bmp', 'webp')
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if source_img:
+            temp_file_path = save_uploaded_file(source_img)
+
+
+            frame = cv2.imread(temp_file_path)
+
+            # st.image(frame, channels="BGR")
+
+            # 添加带标题的上传图像到页面
+            st.image(
+                image=source_img,
+                caption="已上传图像",
+                use_column_width=True
+            )
+            try:
+                with st.expander("检测结果"):
+                    # print(test_door(frame,pic))
+                    st.write(test_door(frame,pic))
+            except Exception as ex:
+                st.write("还没有上传图像！")
+                st.write(ex)
+
+
+def adjust_uploaded_video_door(pic):
+    source_video = st.sidebar.file_uploader(
+        label="选择一个视频..."
+    )
+
+    if source_video:
+        st.video(source_video)
+
+    if source_video:
+        if st.button("执行"):
+            with st.spinner("运行中..."):
+                try:
+                    tfile = tempfile.NamedTemporaryFile()
+                    tfile.write(source_video.read())
+                    vid_cap = cv2.VideoCapture(
+                        tfile.name)
+                    # 保留空间
+                    st_frame = st.empty()
+                    while (vid_cap.isOpened()):
+                        success, image = vid_cap.read()
+                        if success:
+                            st.write(test_door(frame, pic))
+
+
+                        else:
+                            vid_cap.release()
+                            break
+                except Exception as e:
+                    st.error(f"视频加载错误: {e}")
+
+
+def adjust_uploaded_webcam_door(pic):
+    pass

@@ -52,4 +52,5 @@ def test_door(image_name):
 # test_pic/test_image_in.jpg
 # test_pic/test_image_out.jpg
 
-test_door("test_pic/test_image_in.jpg")
+# test_door("test_pic/test_image_in.jpg")
+

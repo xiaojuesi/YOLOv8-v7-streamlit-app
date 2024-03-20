@@ -7,7 +7,7 @@ import streamlit as st
 import config
 from utils import load_model, infer_uploaded_image, infer_uploaded_video, infer_uploaded_webcam
 
-from utils import load_pic,
+from utils import load_pic, adjust_uploaded_image_door
 
 # streamlit run app.py
 
@@ -34,6 +34,7 @@ task_type = st.sidebar.selectbox(
 # 初始化参数
 model_type = None
 pic_type = None
+model = None
 
 if task_type == "电梯人数识别":
 
@@ -98,6 +99,25 @@ elif task_type == "电梯开关门检测":
     except Exception as e:
         st.error(f"加载初始化电梯图片失败，请检查指定路径是否正确: {pic_path}")
 
+    # 图像/视频/摄像头选项
+    st.sidebar.header("图片/视频/摄像头 设置")
+    source_selectbox = st.sidebar.selectbox(
+        "选择输入源",
+        config.SOURCES_LIST_door
+    )
+
+    source_img = None
+
+    if source_selectbox == config.SOURCES_LIST[0]:  # 图像
+        adjust_uploaded_image_door(pic)
+    elif source_selectbox == config.SOURCES_LIST[1]:  # 视频
+        pass
+    elif source_selectbox == config.SOURCES_LIST[2]:  # 摄像头
+        pass
+    else:
+        st.error("目前仅实现了 '图像' ， '视频' ，'摄像头' 作为输入源")
+
+
 
 
 
@@ -109,3 +129,4 @@ else:
     st.error("目前仅实现了 '电梯人数识别', '电梯开关门检测' 功能")
 
 
+# streamlit run app.py

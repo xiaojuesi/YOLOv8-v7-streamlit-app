@@ -19,8 +19,9 @@ ROOT = root_path.relative_to(Path.cwd())
 
 
 # 设置源
-# SOURCES_LIST = ["Image", "Video", "Webcam"]
 SOURCES_LIST = ["图片", "视频", "摄像头"]
+
+SOURCES_LIST_door = ["图片", "视频", "摄像头"]
 
 
 
@@ -33,7 +34,7 @@ yolov7_imporove = DETECTION_MODEL_DIR / "yolov7-imporove.pt"
 
 
 DETECTION_MODEL_LIST = [
-    "YOLOv7n.pt",
+    "YOLOv7.pt",
     "yolov8s.pt",
     "yolov7_imporove.pt",
 
@@ -45,5 +46,5 @@ OPENCV_DOOR_PIC_DIR = ROOT / 'weights' / 'opencv_door'
 door_standard_image = OPENCV_DOOR_PIC_DIR / "standard.jpg"
 
 OPENCV_DOOR_PIC_LIST = [
-    "empty_standard.jpg"
+    "standard.jpg"
 ]
